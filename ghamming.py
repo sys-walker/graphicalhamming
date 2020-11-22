@@ -1,4 +1,4 @@
-import sys
+import sys,re
 
 
 class Matrix(object):
@@ -10,6 +10,10 @@ class Matrix(object):
 def graphic_hamming():
     binary_string = input("Enter binary code >")
     # binary_string = "0110101"
+    if len(binary_string)==0:
+        sys.exit("No data bits were found!")
+    if bool(re.compile(r'[^0-1]').search(binary_string)):
+        sys.exit("Not a string of {0,1}!")
 
     hamming_length, n_parity = find_parity_bits(binary_string)
 
@@ -24,18 +28,22 @@ def graphic_hamming():
 
 def graphic_hamming_find_errors():
     received = input("Enter received binary code >")
+    if len(received)==0:
+        sys.exit("No encoded data were found!")
+    if bool(re.compile(r'[^0-1]').search(received)):
+        sys.exit("Not hamming encode was found!")
 
     n_parity = find_parity_bits(hamming_length=len(received))
 
     header_table = get_hamming_table_header(received, hamming_length=len(received))
 
-    ss = get_hamming_table(header_table, hamming_length=len(received), n_parity=n_parity)
+    table = get_hamming_table(header_table, hamming_length=len(received), n_parity=n_parity)
 
-    sss = get_hamming_table_footer(ss)
+    footer = get_hamming_table_footer(table)
 
-    print_table(header_table, ss, sss)
+    print_table(header_table, table, footer)
 
-    get_error_hamming(received, sss)
+    get_error_hamming(received, footer)
 
 
 def find_parity_bits(binary_string=None, hamming_length=0):
@@ -97,68 +105,44 @@ def get_hamming_table(header_table, hamming_length, n_parity):
         check n bits if data the ignore
         jump n bits
     repeat until n<hamming_length
-
-
-    :param header_table:
-    :param hamming_length:
-    :param n_parity:
-    :return:
     """
-    s = [["*" for j in range(hamming_length)] for i in range(n_parity)]
-
-    bit = 0
-    first_time = True
-    itr = 1
+    s = [["*" for _ in range(hamming_length)] for _ in range(n_parity)]
+    # ------------------- sets "b" into parity bits columns -------------------
     for row in s:
-        if first_time:
-            bit = 1
-            first_time = False
-        else:
-            bit = bit << 1
-
-        salt = bit
-
-        # print("==================== FILA "+str(itr)+"=========================")
-        ###################################
-
-        fit = 0
         bit_paridad = 1
-
-        while fit < len(row):
-            if fit + 1 == bit_paridad:
-                row[fit] = "b"
+        for j in range(len(row)):
+            if j == bit_paridad - 1:
+                row[j] = "b"
                 bit_paridad = bit_paridad << 1
-            fit += 1
 
-        i = salt - 1
+    # ------------------- sets bits according to the header's table if they are data -------------------
+    bit = 1
+    for row in s:
+        jump = bit
         ign = True
-        while i < len(row):
-            if ign == True:
-                ign = False
-            else:
-                ign = True
+        for i in range(jump - 1, len(row), jump):
+
+            ign = False if (ign == True) else True
 
             if ign == False:
-
-                for index in range(i, i + salt):
+                for index in range(i, i + jump):
                     if index >= len(row):
                         break
                     if row[index] != "b":
                         row[index] = int(header_table[index])
-            i += salt
 
-        ###################################
-        itr += 1
+        bit = bit << 1
+
+    # ------------------- cleans up "b" of hamming table columns -------------------
     for row in s:
         for j in range(0, len(row)):
             if row[j] == "*" or row[j] == "b":
                 row[j] = " "
-    bit_pos = 1
-    i = 0
-    for row in s:
-        # print("count ",row," ",row.count(1)%2)
 
-        # print(i,bit_pos-1," --->")
+    # ------------------- Sets the parity bits for each row -------------------
+    i = 0
+    bit_pos = 1
+    for row in s:
         s[i][(bit_pos - 1)] = row.count(1) % 2
         i += 1
         bit_pos = bit_pos << 1
@@ -166,9 +150,9 @@ def get_hamming_table(header_table, hamming_length, n_parity):
     return s
 
 
-def get_hamming_table_footer(s):
+def get_hamming_table_footer(table):
     k = ""
-    for row in Matrix.transpose(s):
+    for row in Matrix.transpose(table):
         k = k + ("1" if 1 in row else "0")
     return k
 
