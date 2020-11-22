@@ -100,9 +100,9 @@ def get_hamming_table_header(binary_string, hamming_length):
 def get_hamming_table(header_table, hamming_length, n_parity):
     """
     for parity bit positin n
-    - jump (n-1)
+    * jump (n-1)
     loop:
-        check n bits if data the ignore
+        * check n bits if not data then ignore
         jump n bits
     repeat until n<hamming_length
     """
