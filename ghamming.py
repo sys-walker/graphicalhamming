@@ -103,7 +103,7 @@ def get_hamming_table(header_table, hamming_length, n_parity):
     * jump (n-1)
     loop:
         * check n bits if not data then ignore
-        jump n bits
+        * jump n bits
     repeat until n<hamming_length
     """
     s = [["*" for _ in range(hamming_length)] for _ in range(n_parity)]
