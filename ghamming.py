@@ -97,17 +97,9 @@ def get_hamming_table_header(binary_string, hamming_length):
     return data
 
 
-def get_hamming_table(header_table, hamming_length, n_parity):
-    """
-    for parity bit positin n
-    * jump (n-1)
-    loop:
-        * check n bits if not data then ignore
-        * jump n bits
-    repeat until end of table rows
-    """
-    s = [["*" for _ in range(hamming_length)] for _ in range(n_parity)]
+def generate_table(hamming_length, n_parity):
     # ------------------- sets "b" into parity bits columns -------------------
+    s = [["*" for _ in range(hamming_length)] for _ in range(n_parity)]
     for row in s:
         bit_paridad = 1
         for j in range(len(row)):
@@ -115,6 +107,11 @@ def get_hamming_table(header_table, hamming_length, n_parity):
                 row[j] = "b"
                 bit_paridad = bit_paridad << 1
 
+
+    return s
+
+
+def compute_hamming_table(s, header_table):
     # ------------------- sets bits according to the header's table if they are data -------------------
     bit = 1
     for row in s:
@@ -132,13 +129,10 @@ def get_hamming_table(header_table, hamming_length, n_parity):
                         row[index] = int(header_table[index])
 
         bit = bit << 1
+    put_parity_bits(s)
 
-    # ------------------- cleans up "b" of hamming table columns -------------------
-    for row in s:
-        for j in range(0, len(row)):
-            if row[j] == "*" or row[j] == "b":
-                row[j] = " "
 
+def put_parity_bits(s):
     # ------------------- Sets the parity bits for each row -------------------
     i = 0
     bit_pos = 1
@@ -146,6 +140,31 @@ def get_hamming_table(header_table, hamming_length, n_parity):
         s[i][(bit_pos - 1)] = row.count(1) % 2
         i += 1
         bit_pos = bit_pos << 1
+
+
+def clean_up_table(s):
+    # ------------------- cleans up "b" of hamming table columns -------------------
+    for row in s:
+        for j in range(0, len(row)):
+            if row[j] == "*" or row[j] == "b":
+                row[j] = " "
+
+
+def get_hamming_table(header_table, hamming_length, n_parity):
+    """
+    for parity bit position n
+    * jump (n-1)
+    loop:
+        * check n bits if not data then ignore
+        * jump n bits
+    repeat until end of table rows
+    """
+
+    s = generate_table(hamming_length,n_parity)
+
+    compute_hamming_table(s,header_table)
+
+    clean_up_table(s)
 
     return s
 
