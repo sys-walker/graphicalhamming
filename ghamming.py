@@ -494,10 +494,14 @@ class Hamming_interface(Tk):
 
 
 
+
 def main():
     mi_app = Hamming_interface()
     mi_app.mainloop()
     return 0
+
+    print(header)
+    print(footer)
 
 
 if __name__ == '__main__':
