@@ -27,7 +27,8 @@ class Hamming():
             self.decode()
         else:
             print("Unknown option")
-
+            
+    @classmethod
     def is_binary_str_format(self, binary_string):
         return not bool(re.compile(r'[^0-1]').search(binary_string))
 
